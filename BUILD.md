@@ -58,16 +58,21 @@ xcode-select --install
 
 ### 1. 初始化项目环境
 
-```bash
+```powershell
 # 进入项目目录
 cd CiweimaoDownloader
 
-# 使用 uv 创建虚拟环境并安装依赖
+# 使用 uv 创建虚拟环境（指定 Python 3.12，MinGW 对 3.13 支持不完善）
+uv venv --python 3.12
+
+# 安装依赖
 uv sync
 
 # 安装编译工具（开发依赖）
 uv sync --dev
 ```
+
+> **注意**: 使用 MinGW 编译时必须用 Python 3.12 或更低版本。Python 3.13 可能会编译失败。
 
 ### 2. 编译为 exe
 
