@@ -2,19 +2,57 @@
 
 ## 前置条件
 
-1. **安装 uv** (Python 包管理器)
-   ```bash
-   # Windows (PowerShell)
-   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+### 1. 安装 uv (Python 包管理器)
 
-   # Linux/macOS
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
+```powershell
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
 
-2. **安装 C 编译器**
-   - Windows: 安装 [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) 或 MinGW-w64
-   - Linux: `sudo apt install build-essential` (Ubuntu/Debian)
-   - macOS: `xcode-select --install`
+```bash
+# Linux/macOS
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### 2. 安装 C 编译器 (重要!)
+
+#### Windows (必须安装，否则会报 ilink 错误)
+
+**方法一：安装 Visual Studio Build Tools（推荐）**
+
+1. 下载 [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+2. 运行安装程序，选择 **"使用 C++ 的桌面开发"** 工作负载
+3. 确保勾选以下组件：
+   - MSVC v143 - VS 2022 C++ x64/x86 生成工具
+   - Windows 11 SDK（或 Windows 10 SDK）
+4. 安装完成后**重启电脑**
+
+**方法二：安装完整 Visual Studio**
+
+1. 下载 [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/)
+2. 安装时选择 **"使用 C++ 的桌面开发"**
+
+**方法三：使用 MinGW-w64（备选）**
+
+```powershell
+# 使用 winget 安装
+winget install -e --id mingw-w64.mingw-w64
+```
+
+或从 [MinGW-w64 下载页面](https://www.mingw-w64.org/downloads/) 下载安装。
+
+#### Linux
+
+```bash
+sudo apt install build-essential  # Ubuntu/Debian
+sudo yum groupinstall "Development Tools"  # CentOS/RHEL
+```
+
+#### macOS
+
+```bash
+xcode-select --install
+```
 
 ## 快速开始
 
@@ -115,6 +153,24 @@ uv run python -m nuitka \
 ```
 
 ## 常见问题
+
+### Q: 报错 "No tool module 'ilink' found" 或 Scons 编译失败？
+
+这是因为没有安装 C 编译器。解决方法：
+
+1. **安装 Visual Studio Build Tools**（见上方"前置条件"）
+2. 安装完成后**必须重启电脑**
+3. 重新打开终端运行编译命令
+
+如果已安装但仍报错，尝试在 **"Developer Command Prompt for VS"** 或 **"x64 Native Tools Command Prompt"** 中运行编译命令。
+
+### Q: 使用 MinGW 编译？
+
+如果你使用 MinGW 而不是 MSVC，需要指定编译器：
+
+```powershell
+uv run python -m nuitka --mingw64 --standalone --onefile src/main.py
+```
 
 ### Q: 编译时间很长？
 A: 首次编译需要下载依赖和编译缓存，后续会快很多。可以添加 `--jobs=N` 使用多核编译。
