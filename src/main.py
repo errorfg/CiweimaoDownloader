@@ -19,31 +19,46 @@ if __name__ == "__main__":
     
     rootFolder = Path('.')
     queue = []
-    
+    foundFolders = []
+    convertedCount = 0
+    skippedCount = 0
+
+    # 扫描所有数字文件夹
+    try:
+        for folder in rootFolder.iterdir():
+            if folder.is_dir() and folder.name.isdigit():
+                foundFolders.append(folder.name)
+    except Exception as e:
+        models.Print.err(f"[ERR] 自动寻找目录失败，原因是： {e}")
+
     if config.setting.manualBook.enable == True:
         models.Print.info("[INFO] 手动目录模式已开启")
         queue.append("1000000")
-        
+
     elif config.setting.batch.enable == False:
-        try:
-            for folder in rootFolder.iterdir():
-                if folder.is_dir() and folder.name.isdigit():
-                    models.Print.warn(f"[INFO] 自动模式找到了以下目录：{folder.name}")    
-        except Exception as e:
-            models.Print.err(f"[ERR] 自动寻找目录失败，原因是： {e}")
-        
-        url = models.Print.opt(f"[OPT] 输入你想下载的书籍Url或目录名字：")
-        queue.append(url)
-    elif config.setting.batch.auto == False: 
+        if len(foundFolders) > 0:
+            models.Print.info(f"[INFO] 找到了 {len(foundFolders)} 个待转换的目录：")
+            for folder in foundFolders:
+                models.Print.warn(f"  - {folder}")
+
+            choice = models.Print.opt(f"[OPT] 输入 'all' 转换全部，或输入单个书籍Url/目录名：")
+            if choice.lower() == 'all':
+                queue = foundFolders
+                models.Print.info(f"[INFO] 将转换全部 {len(queue)} 本书籍")
+            else:
+                queue.append(choice)
+        else:
+            url = models.Print.opt(f"[OPT] 未找到待转换目录，请输入书籍Url或目录名字：")
+            queue.append(url)
+    elif config.setting.batch.auto == False:
         queue = config.setting.batch.queue
     else:
-        try:
-            for folder in rootFolder.iterdir():
-                if folder.is_dir() and folder.name.isdigit():
-                    models.Print.warn(f"[INFO] 自动模式找到了以下目录：{folder.name}")
-                    queue.append(folder.name)
-        except Exception as e:
-            models.Print.err(f"[ERR] 自动寻找目录失败，原因是： {e}")
+        if len(foundFolders) > 0:
+            for folder in foundFolders:
+                models.Print.warn(f"[INFO] 自动模式找到了以下目录：{folder}")
+            queue = foundFolders
+        else:
+            models.Print.warn("[WARN] 自动模式未找到任何数字目录")
     
     for url in queue:
         book = models.Book() #清空状态
@@ -104,8 +119,22 @@ if __name__ == "__main__":
                 models.Print.err(f"[ERR] 设置文件中，imageFolder为无效地址，错误为{e}")
         
         config.CalculateParama(book) # 计算一些参数
-        
-        if book.decryptedTxt.exists(): 
+
+        # 检测是否已转换过（epub文件是否存在）
+        epubPath = Path(f"{book.safeName}.epub")
+        if epubPath.exists() and config.setting.conversion.skipExisting:
+            if config.setting.conversion.askBeforeSkip:
+                skip = models.Print.opt(f"[OPT] 《{book.name}》已存在epub文件，跳过？(Y/n): ")
+                if skip.lower() != 'n':
+                    models.Print.info(f"[INFO] 跳过《{book.name}》")
+                    skippedCount += 1
+                    continue
+            else:
+                models.Print.info(f"[INFO] 《{book.name}》已存在epub文件，自动跳过")
+                skippedCount += 1
+                continue
+
+        if book.decryptedTxt.exists():
             book.decryptedTxt.unlink(True) #避免重复写入，先删除
         
         for chapter in tqdm(book.chapters,desc=models.Print.processingLabel(f"[PROCESSING] 解码中")):
@@ -161,4 +190,9 @@ if __name__ == "__main__":
             book.chapters.insert(0,chapter)
         
         epubUtils.GenerateEpub(book, f"{book.safeName}.epub")
+        convertedCount += 1
+
+    # 显示批量转换统计
+    if len(queue) > 1:
+        models.Print.info(f"[INFO] 批量转换完成！共处理 {len(queue)} 本，成功转换 {convertedCount} 本，跳过 {skippedCount} 本")
     models.Print.opt(f"[OPT] 任意键退出程序...")
