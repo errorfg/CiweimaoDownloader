@@ -21,3 +21,4 @@ class AsyncHTTP:
     async def close(cls):
         if cls.session:
             await cls.session.close()
+            cls.session = None  # 重置为 None，下次使用时会重新创建
