@@ -5,7 +5,7 @@ homePage:
   style: "{bookCover}{Enter}书名:{bookName}{Enter}作者:{bookAuthor}{Enter}描述:{bookDescription}"
 
 #这是批量模式的开启选项
-batch: 
+batch:
   enable: false
   #打开这个选项能让程序自动处理目录下的以数字为名的文件夹，而queue中的内容会被忽略
   auto: true
@@ -13,6 +13,13 @@ batch:
   queue:
     - 100000000
     - 200000000
+
+#转换相关的设置
+conversion:
+  #跳过已经转换过的小说（检测epub文件是否存在）
+  skipExisting: true
+  #跳过前是否询问用户确认
+  askBeforeSkip: true
 
 #这是缓存的选项
 cache:

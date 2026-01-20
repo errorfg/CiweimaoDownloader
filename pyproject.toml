@@ -1,0 +1,53 @@
+[project]
+name = "ciweimao-downloader"
+version = "1.0.0"
+description = "刺猬猫小说下载转换工具"
+readme = "README.md"
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "requests>=2.31.0",
+    "colorama>=0.4.6",
+    "urllib3>=2.0.0",
+    "ebooklib>=0.18",
+    "beautifulsoup4>=4.12.0",
+    "tqdm>=4.66.0",
+    "pycryptodome>=3.19.0",
+    "pydantic>=2.5.0",
+    "pyyaml>=6.0",
+    "filetype>=1.2.0",
+    "aiohttp>=3.9.0",
+    "aiofiles>=23.2.0",
+]
+
+[project.optional-dependencies]
+build = [
+    "nuitka>=2.0",
+    "ordered-set>=4.1.0",
+    "zstandard>=0.22.0",
+]
+
+[project.scripts]
+ciweimao = "src.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.uv]
+dev-dependencies = [
+    "nuitka>=2.0",
+    "ordered-set>=4.1.0",
+    "zstandard>=0.22.0",
+]
+
+# Nuitka 编译配置（供参考，实际通过命令行使用）
+[tool.nuitka]
+# 这些配置可以通过 nuitka 命令行参数使用
+# --standalone: 生成独立可执行文件
+# --onefile: 打包成单个exe
+# --enable-plugin=upx: 压缩exe大小
+# --windows-console-mode=disable: 隐藏控制台（GUI程序用）
+# --windows-icon-from-ico=icon.ico: 设置图标

@@ -108,6 +108,10 @@ class manualBookConfig(BaseModel):
     autoExtend: bool = True
     jsonString: str = field(default_factory=str)
 
+class conversionConfig(BaseModel):
+    skipExisting: bool = True  # 跳过已转换的小说
+    askBeforeSkip: bool = True  # 跳过前是否询问用户
+
 class Config(BaseModel):
     homePage: homePageConfig
     batch: batchConfig
@@ -115,3 +119,4 @@ class Config(BaseModel):
     log: logConfig
     multiThread: multiThreadConfig
     manualBook: manualBookConfig
+    conversion: conversionConfig = conversionConfig()
